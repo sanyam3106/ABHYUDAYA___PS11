@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_complaint'])) {
     $title = $conn->real_escape_string($_POST['title']);
     $description = $conn->real_escape_string($_POST['description']);
     $category = $_POST['category'];
-    $priority = $_POST['priority']; // Added priority selection for student as per some requirement, or usually admin sets it? Prompt says "put according to priority" for admin. Let's let student set initial urgency or maybe just default to Low. Prompt says "priority-based handling" but doesn't explicitly say who sets it. Let's allow student to suggest it.
+    $priority = $_POST['priority']; 
 
     $sql = "INSERT INTO complaints (user_id, title, description, category, priority) VALUES ('$user_id', '$title', '$description', '$category', '$priority')";
     
@@ -34,13 +34,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_feedback'])) {
 
     $sql = "INSERT INTO feedback (complaint_id, user_id, rating, comment) VALUES ('$complaint_id', '$user_id', '$rating', '$comment')";
     if ($conn->query($sql) === TRUE) {
-        // Optionally update complaint status to Closed if feedback is given? 
-        // Prompt says "if the problem is solved then show completed and then a side thing which shows feedback"
         $conn->query("UPDATE complaints SET status = 'Closed' WHERE id = '$complaint_id'");
         $message = "Feedback submitted successfully!";
     } else {
         $message = "Error: " . $conn->error;
     }
+}
+
+// Handle Complaint Deletion
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_complaint'])) {
+    $complaint_id = $_POST['complaint_id'];
+    
+    // Safety check: ensure the complaint belongs to the logged-in user
+    $check_sql = "SELECT * FROM complaints WHERE id = ? AND user_id = ?";
+    $stmt = $conn->prepare($check_sql);
+    $stmt->bind_param("ii", $complaint_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $delete_sql = "DELETE FROM complaints WHERE id = ?";
+        $del_stmt = $conn->prepare($delete_sql);
+        $del_stmt->bind_param("i", $complaint_id);
+        if ($del_stmt->execute()) {
+            $message = "Complaint deleted successfully!";
+        } else {
+            $message = "Error deleting complaint: " . $conn->error;
+        }
+        $del_stmt->close();
+    } else {
+        $message = "You are not authorized to delete this complaint.";
+    }
+    $stmt->close();
 }
 
 // Fetch Student Complaints
@@ -71,6 +96,7 @@ $result_feedback = $conn->query($sql_feedback_history);
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header">
+                <img src="logo.jpeg" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; margin-bottom: 0.5rem;">
                 <h2>HostelEase</h2>
             </div>
             <div class="user-info">
@@ -145,6 +171,7 @@ $result_feedback = $conn->query($sql_feedback_history);
                                 <th>Category</th>
                                 <th>Date</th>
                                 <th>Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -160,10 +187,17 @@ $result_feedback = $conn->query($sql_feedback_history);
                                                 <?php echo $row['status']; ?>
                                             </span>
                                         </td>
+                                        <td>
+                                            <form method="POST" action="" onsubmit="return confirmDelete();" style="display:inline;">
+                                                <input type="hidden" name="delete_complaint" value="1">
+                                                <input type="hidden" name="complaint_id" value="<?php echo $row['id']; ?>">
+                                                <button type="submit" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.85rem; padding:0; text-decoration:underline;">Delete</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 <?php endwhile; ?>
                             <?php else: ?>
-                                <tr><td colspan="5">No complaints found.</td></tr>
+                                <tr><td colspan="6">No complaints found.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -232,6 +266,11 @@ $result_feedback = $conn->query($sql_feedback_history);
 
         </div>
     </div>
+    <script>
+        function confirmDelete() {
+            return confirm("Are you sure you want to delete this complaint?");
+        }
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

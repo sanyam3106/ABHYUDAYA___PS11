@@ -13,6 +13,8 @@
     <div class="auth-container">
         <div class="auth-box">
             <div class="auth-header">
+                <img src="logo.jpeg" alt="HostelEase Logo"
+                    style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 1rem;">
                 <h1>HostelEase</h1>
                 <p>Complaint Management System</p>
             </div>

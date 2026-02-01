@@ -15,12 +15,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_status'])) {
     $complaint_id = $_POST['complaint_id'];
     $new_status = $_POST['status'];
 
-    $sql_update = "UPDATE complaints SET status = '$new_status' WHERE id = '$complaint_id'";
-    if ($conn->query($sql_update) === TRUE) {
-        $message = "Status updated to " . $new_status;
+    // Use prepared statements for security
+    $stmt = $conn->prepare("UPDATE complaints SET status = ? WHERE id = ?");
+    $stmt->bind_param("si", $new_status, $complaint_id);
+
+    if ($stmt->execute()) {
+        $message = "Status updated to " . htmlspecialchars($new_status);
     } else {
         $message = "Error updating status: " . $conn->error;
     }
+    $stmt->close();
 }
 
 // Fetch Assigned Complaints
@@ -52,6 +56,8 @@ $result_tasks = $conn->query($sql_tasks);
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header">
+                <img src="logo.jpeg" alt="Logo"
+                    style="width: 40px; height: 40px; border-radius: 50%; margin-bottom: 0.5rem;">
                 <h2>HostelEase</h2>
                 <span class="badge" style="background-color: #e2e8f0; color: #475569;">STAFF</span>
             </div>

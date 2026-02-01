@@ -7,11 +7,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
     $role = $_POST['role'];
 
-    $sql = "SELECT * FROM users WHERE email = '$email' AND role = '$role'";
-    $result = $conn->query($sql);
+    // Use prepared statements for security
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND role = ?");
+    $stmt->bind_param("ss", $email, $role);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
+        // Since passwords are currently plaintext in the DB, we compare directly.
+        // In a production app, we should use password_hash and password_verify.
         if ($password === $row['password']) {
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['user_name'] = $row['name'];
@@ -34,5 +39,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: index.php?error=User not found with this role");
         exit();
     }
+    $stmt->close();
 }
 ?>
