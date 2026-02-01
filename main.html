@@ -10,12 +10,123 @@
 </head>
 
 <body>
+    <nav class="navbar" id="navbar">
+        <a href="main.html" class="nav-logo">HostelEase</a>
+        <div class="nav-links">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#about" class="nav-link">About</a>
+            <a href="login.html" class="cta-btn" style="padding: 0.6rem 1.5rem; font-size: 0.95rem;">Login to Portal</a>
+        </div>
+    </nav>
+
     <div class="landing-hero">
-        <h1 class="landing-title">HostelEase</h1>
-        <p class="landing-subtitle">Streamlined Complaint Management & Maintenance Tracking for Modern Hostels.</p>
-        <a href="login.html" class="cta-btn">Login to Portal</a>
+        <h1 class="landing-title">Hostel Management <br> Made Simple.</h1>
+        <p class="landing-subtitle">The ultimate platform for streamlined complaints, lightning-fast maintenance
+            tracking, and a better hostel living experience.</p>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <a href="login.html" class="cta-btn">Get Started</a>
+            <a href="#features" class="cta-btn"
+                style="background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2);">Learn
+                More</a>
+        </div>
     </div>
 
+    <section id="features" class="features-section">
+        <span class="section-tag">Why HostelEase?</span>
+        <h2 class="section-title">Everything you need to <br> manage your stay</h2>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">✨</div>
+                <h4>Digital Complaints</h4>
+                <p>Skip the paperwork. Submit maintenance requests in seconds directly from your dashboard.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛰️</div>
+                <h4>Real-time Tracking</h4>
+                <p>Know exactly who is working on your issue and get instant updates as status changes.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h4>Fast Resolution</h4>
+                <p>Our intelligent priority system ensures urgent issues get handled by staff immediately.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about-section">
+        <div class="about-container">
+            <div class="about-image">
+                <img src="new background.jpeg" alt="About HostelEase"
+                    style="width: 100%; height: 100%; object-fit: cover; border-radius: 1.5rem;">
+            </div>
+            <div class="about-content">
+                <span class="section-tag" style="text-align: left;">About Us</span>
+                <h2 class="section-title" style="text-align: left; font-size: 2rem;">Revolutionizing Hostel Management
+                </h2>
+                <p style="color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.8;">
+                    HostelEase was born out of a simple vision: to bridge the gap between students and management. We
+                    believe that a comfortable living environment is essential for academic success.
+                </p>
+                <p style="color: var(--text-light); margin-bottom: 2rem; line-height: 1.8;">
+                    By digitizing the complaint process, we ensure transparency, accountability, and speed. Our platform
+                    empowers students to voice their concerns and enables staff to respond with precision.
+                </p>
+                <div class="about-stats">
+                    <div class="about-stat">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color);">500+</div>
+                        <div style="font-size: 0.85rem; color: var(--text-light);">Active Students</div>
+                    </div>
+                    <div class="about-stat">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color);">24/7</div>
+                        <div style="font-size: 0.85rem; color: var(--text-light);">Support Lines</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>HostelEase</h3>
+                <p>Transforming hostel living <br> through digital innovation.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h5>Portal</h5>
+                    <ul>
+                        <li><a href="login.html">Student Login</a></li>
+                        <li><a href="login.html">Staff Login</a></li>
+                        <li><a href="login.html">Admin Login</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h5>Support</h5>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 HostelEase Portal. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
     <script src="script.js"></script>
 </body>
 

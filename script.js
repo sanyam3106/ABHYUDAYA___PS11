@@ -1,11 +1,11 @@
 // DOM Elements
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // Sidebar Toggle for Mobile
     const createSidebarToggle = () => {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
-        
+
         if (!sidebar || !mainContent) return;
 
         const toggleBtn = document.createElement('button');
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cursor: pointer;
             display: none; 
         `;
-        
+
         document.body.appendChild(toggleBtn);
 
         // Check screen size
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    createSidebarToggle();
+    // createSidebarToggle(); // Disabled to allow CSS-based responsive navbar
 
     // Fade out messages
     const message = document.querySelector('div[style*="background-color: #dcfce7"]'); // Success msg

@@ -76,6 +76,11 @@
                     <textarea name="description" class="form-control" rows="4" required
                         placeholder="Describe the issue in detail..."></textarea>
                 </div>
+                <div class="form-group">
+                    <label>Attach Media (Image/Video) - Optional</label>
+                    <input type="file" name="media" class="form-control" accept="image/*,video/*"
+                        style="padding: 0.5rem;">
+                </div>
                 <button type="submit" class="btn">Submit Complaint</button>
             </form>
         </section>
@@ -92,6 +97,7 @@
                             <th>Category</th>
                             <th>Date</th>
                             <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -104,7 +110,7 @@
     </div>
     <script src="script.js"></script>
     <script>
-        function handleStaticSubmit(e) {
+        async function handleStaticSubmit(e) {
             e.preventDefault();
 
             // Get form values
@@ -112,19 +118,34 @@
             const title = form.title.value;
             const category = form.category.value;
             const priority = form.priority.value;
+            const description = form.description.value;
+            const mediaFile = form.media.files[0];
             const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             // Generate random ID
             const id = Math.floor(Math.random() * 1000) + 100;
+
+            let mediaData = null;
+            if (mediaFile) {
+                // Convert file to Base64 for local storage
+                mediaData = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(mediaFile);
+                });
+            }
 
             const complaint = {
                 id: id,
                 title: title,
                 category: category,
                 priority: priority,
+                description: description,
                 date: date,
                 status: 'Submitted',
-                student: 'Student (Demo)',
-                room: '101'
+                student: 'Student One',
+                room: '101',
+                media: mediaData,
+                mediaType: mediaFile ? mediaFile.type : null
             };
 
             // Save to LocalStorage
@@ -139,12 +160,14 @@
             }
 
             const newRow = document.createElement('tr');
+            const mediaHint = mediaData ? `<br><small style="color:var(--primary-color);">📎 Media Attached</small>` : '';
             newRow.innerHTML = `
                 <td>#${id}</td>
-                <td>${title}</td>
+                <td>${title}${mediaHint}</td>
                 <td>${category}</td>
                 <td>${date}</td>
                 <td><span class="badge status-submitted">Submitted</span></td>
+                <td><button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #64748b;" onclick="viewTracking(${id})">Track</button></td>
             `;
 
             newRow.style.animation = 'fadeIn 0.5s';
@@ -176,17 +199,143 @@
                 tbody.innerHTML = '';
                 complaints.slice().reverse().forEach(c => {
                     const row = document.createElement('tr');
+                    // Action Button Logic
+                    let actionBtn = `<button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #64748b;" onclick="viewTracking(${c.id})">Track</button>`;
+
+                    if (c.status === 'Resolved' && !c.feedback) {
+                        actionBtn += `<button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: var(--warning); margin-left: 5px;" onclick="openFeedback(${c.id})">Rate</button>`;
+                    } else if (c.feedback) {
+                        actionBtn += `<span style="font-size: 0.8rem; margin-left: 5px; color: var(--success);">Rated ★${c.feedback.rating}</span>`;
+                    }
+
+                    const mediaHint = c.media ? `<br><small style="color:var(--primary-color); cursor:pointer;" onclick="viewMedia(${c.id})">📎 View Media</small>` : '';
                     row.innerHTML = `
                         <td>#${c.id}</td>
-                        <td>${c.title}</td>
+                        <td>${c.title}${mediaHint}</td>
                         <td>${c.category}</td>
                         <td>${c.date}</td>
                         <td><span class="badge status-${c.status.toLowerCase()}">${c.status}</span></td>
+                        <td>${actionBtn}</td>
                     `;
                     tbody.appendChild(row);
                 });
             }
         });
+
+        // Tracking Modal Logic
+        window.viewTracking = function (id) {
+            const complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
+            const complaint = complaints.find(c => c.id === id);
+            if (!complaint) return;
+
+            let trackingHtml = `<h3>Tracking History: #${id}</h3><ul style="list-style: none; padding: 0;">`;
+            if (complaint.tracking && complaint.tracking.length > 0) {
+                complaint.tracking.forEach(t => {
+                    trackingHtml += `
+                        <li style="border-left: 3px solid #ccc; padding-left: 10px; margin-bottom: 15px;">
+                            <strong>${t.role}</strong> <span style="font-size: 0.8rem; color: #666;"> - ${t.date}</span><br>
+                            ${t.text}
+                        </li>`;
+                });
+            } else {
+                trackingHtml += '<li>No updates yet.</li>';
+            }
+            trackingHtml += '</ul>';
+
+            // Simple Alert for Prototype (or Custom Modal)
+            // Using a simple overlay div for better UX than alert
+            showOverlay(trackingHtml);
+        };
+
+        // Feedback Modal Logic
+        window.openFeedback = function (id) {
+            const html = `
+                <h3>Rate Service: #${id}</h3>
+                <form onsubmit="submitFeedback(event, ${id})">
+                    <div class="form-group">
+                        <label>Rating (1-5)</label>
+                        <select id="fb_rating" class="form-control" required>
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Good</option>
+                            <option value="3">3 - Average</option>
+                            <option value="2">2 - Poor</option>
+                            <option value="1">1 - Very Poor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Comment</label>
+                        <textarea id="fb_comment" class="form-control" required placeholder="How was the service?"></textarea>
+                    </div>
+                    <button type="submit" class="btn">Submit Feedback</button>
+                    <button type="button" class="btn" style="background: #ccc; margin-top: 10px;" onclick="closeOverlay()">Cancel</button>
+                </form>
+            `;
+            showOverlay(html);
+        };
+
+        window.submitFeedback = function (e, id) {
+            e.preventDefault();
+            const rating = document.getElementById('fb_rating').value;
+            const comment = document.getElementById('fb_comment').value;
+
+            let complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
+            const index = complaints.findIndex(c => c.id === id);
+            if (index !== -1) {
+                complaints[index].feedback = { rating, comment, date: new Date().toLocaleDateString() };
+                localStorage.setItem('hostel_complaints', JSON.stringify(complaints));
+                closeOverlay();
+                window.location.reload();
+            }
+        };
+
+        // View Media Logic
+        window.viewMedia = function (id) {
+            const complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
+            const complaint = complaints.find(c => c.id === id);
+            if (!complaint || !complaint.media) return;
+
+            let mediaHtml = '';
+            if (complaint.mediaType && complaint.mediaType.startsWith('video/')) {
+                mediaHtml = `
+                    <video controls style="max-width: 100%; border-radius: 0.5rem; margin-top: 1rem;">
+                        <source src="${complaint.media}" type="${complaint.mediaType}">
+                        Your browser does not support the video tag.
+                    </video>
+                `;
+            } else {
+                mediaHtml = `<img src="${complaint.media}" style="max-width: 100%; border-radius: 0.5rem; margin-top: 1rem;" alt="Complaint Media">`;
+            }
+
+            const html = `
+                <h3>Media Attachment: #${id}</h3>
+                ${mediaHtml}
+                <div style="margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
+                    <strong>Description:</strong><br>${complaint.description || 'No description provided.'}
+                </div>
+            `;
+            showOverlay(html);
+        };
+
+        // Helper Overlay
+        function showOverlay(content) {
+            let overlay = document.getElementById('custom-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'custom-overlay';
+                overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;';
+                document.body.appendChild(overlay);
+            }
+            overlay.innerHTML = `<div style="background: white; padding: 2rem; border-radius: 1rem; max-width: 400px; width: 90%; position: relative;">
+                <button onclick="closeOverlay()" style="position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                ${content}
+            </div>`;
+            overlay.style.display = 'flex';
+        }
+
+        window.closeOverlay = function () {
+            const overlay = document.getElementById('custom-overlay');
+            if (overlay) overlay.style.display = 'none';
+        }
     </script>
 </body>
 

@@ -50,32 +50,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><span class="badge badge-high">High</span></td>
-                                <td><strong>Power Failure</strong><br><span
-                                        style="font-size: 0.85rem; color: #4b5563;">Room is dark</span></td>
-                                <td>Hostel A<br>Room: 202</td>
-                                <td>Oct 12, 10:00</td>
-                                <td><span class="badge status-assigned">Assigned</span></td>
-                                <td>
-                                    <button class="btn"
-                                        style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto; background-color: var(--warning);">Start
-                                        Work</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="badge badge-low">Low</span></td>
-                                <td><strong>Loose Hindge</strong><br><span
-                                        style="font-size: 0.85rem; color: #4b5563;">Cupboard door</span></td>
-                                <td>Hostel B<br>Room: 104</td>
-                                <td>Oct 11, 14:30</td>
-                                <td><span class="badge status-inprogress">In Progress</span></td>
-                                <td>
-                                    <button class="btn"
-                                        style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto; background-color: var(--success);">Mark
-                                        Resolved</button>
-                                </td>
-                            </tr>
+                            <!-- Tasks will be loaded from LocalStorage -->
                         </tbody>
                     </table>
                 </div>
@@ -84,25 +59,111 @@
     </div>
     <script src="script.js"></script>
     <script>
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.onclick = function () {
-                const row = this.closest('tr');
-                const statusCell = row.cells[4]; // Index 4 is Status column
+        document.addEventListener('DOMContentLoaded', () => {
+            const complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
+            const tbody = document.querySelector('tbody');
 
-                if (this.textContent.trim() === 'Start Work') {
-                    // Update Status Badge
-                    statusCell.innerHTML = '<span class="badge status-inprogress">In Progress</span>';
-                    // Update Button
-                    this.textContent = 'Mark Resolved';
-                    this.style.backgroundColor = 'var(--success)';
-                } else if (this.textContent.trim() === 'Mark Resolved') {
-                    // Update Status Badge
-                    statusCell.innerHTML = '<span class="badge status-resolved">Resolved</span>';
-                    // Update Button (Hide actions)
-                    row.cells[5].innerHTML = '<span style="color: var(--success); font-size: 1.2rem;">&#10003;</span>';
-                }
+            // Filter for tasks that are Assigned or In Progress (simulating this staff member's queue)
+            // For demo purposes, we'll just show ALL assigned/in-progress tasks to make it easy to test.
+            const myTasks = complaints.filter(c => c.status === 'Assigned' || c.status === 'In Progress');
+
+            if (myTasks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem; color: #6b7280;">No pending tasks assigned to you.</td></tr>';
+            } else {
+                tbody.innerHTML = '';
+                myTasks.forEach(task => {
+                    const row = document.createElement('tr');
+
+                    let actionBtn = '';
+                    if (task.status === 'Assigned') {
+                        actionBtn = `<button class="btn" onclick="updateStatus(this, ${task.id}, 'In Progress')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto; background-color: var(--warning);">Start Work</button>`;
+                    } else if (task.status === 'In Progress') {
+                        actionBtn = `<button class="btn" onclick="updateStatus(this, ${task.id}, 'Resolved')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto; background-color: var(--success);">Mark Resolved</button>`;
+                    }
+
+                    const badgeClass = task.priority === 'High' ? 'badge-high' : (task.priority === 'Medium' ? 'badge-medium' : 'badge-low');
+
+                    const mediaHint = task.media ? `<br><small style="color:var(--primary-color); cursor:pointer;" onclick="viewMedia(${task.id})">📎 View Media</small>` : '';
+
+                    row.innerHTML = `
+                        <td><span class="badge ${badgeClass}">${task.priority}</span></td>
+                        <td><strong>${task.title}</strong>${mediaHint}<br><span style="font-size: 0.85rem; color: #4b5563;">${task.category}</span></td>
+                        <td>Hostel A<br>Room: ${task.room || '101'}</td>
+                        <td>${task.date}</td>
+                        <td><span class="badge status-${task.status.toLowerCase().replace(' ', '')}">${task.status}</span></td>
+                        <td>${actionBtn}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
             }
         });
+
+        window.updateStatus = function (btn, id, newStatus) {
+            // Prompt for details
+            let defaultText = newStatus === 'In Progress' ? 'Work started.' : 'Issue resolved successfully.';
+            const remark = prompt(`Add a remark for the "Task ${newStatus}" update:`, defaultText);
+
+            let complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
+            const index = complaints.findIndex(c => c.id === id);
+
+            if (index !== -1) {
+                complaints[index].status = newStatus;
+
+                // Add to tracking history
+                if (!complaints[index].tracking) complaints[index].tracking = [];
+                complaints[index].tracking.push({
+                    role: 'Staff',
+                    text: remark || defaultText,
+                    date: new Date().toLocaleString()
+                });
+
+                localStorage.setItem('hostel_complaints', JSON.stringify(complaints));
+
+                // Refresh the list to reflect changes (simplest way for prototype)
+                window.location.reload();
+            }
+        };
+
+        // View Media & Overlay Logic (Shared)
+        window.viewMedia = function (id) {
+            const complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
+            const complaint = complaints.find(c => c.id === id);
+            if (!complaint || !complaint.media) return;
+
+            let mediaHtml = '';
+            if (complaint.mediaType && complaint.mediaType.startsWith('video/')) {
+                mediaHtml = `<video controls style="max-width: 100%; border-radius: 0.5rem; margin-top: 1rem;"><source src="${complaint.media}" type="${complaint.mediaType}">Your browser does not support the video tag.</video>`;
+            } else {
+                mediaHtml = `<img src="${complaint.media}" style="max-width: 100%; border-radius: 0.5rem; margin-top: 1rem;" alt="Complaint Media">`;
+            }
+
+            const html = `
+                <h3>Media Attachment: #${id}</h3>
+                ${mediaHtml}
+                <div style="margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
+                    <strong>Description:</strong><br>${complaint.description || 'No description provided.'}
+                </div>
+                <button class="btn" style="margin-top: 1rem; background: #ccc;" onclick="closeOverlay()">Close</button>
+            `;
+            showOverlay(html);
+        };
+
+        function showOverlay(content) {
+            let overlay = document.getElementById('custom-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'custom-overlay';
+                overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;';
+                document.body.appendChild(overlay);
+            }
+            overlay.innerHTML = `<div style="background: white; padding: 2rem; border-radius: 1rem; max-width: 400px; width: 90%; position: relative;">${content}</div>`;
+            overlay.style.display = 'flex';
+        }
+
+        window.closeOverlay = function () {
+            const overlay = document.getElementById('custom-overlay');
+            if (overlay) overlay.style.display = 'none';
+        }
     </script>
 </body>
 

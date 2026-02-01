@@ -51,12 +51,7 @@
                 <button type="submit" class="btn">Login</button>
             </form>
 
-            <div style="margin-top: 1rem; text-align: center; font-size: 0.8rem; color: #6b7280;">
-                <p>Default Credentials (for testing):</p>
-                <p>Student: student@test.com / password123</p>
-                <p>Admin: admin@test.com / admin123</p>
-                <p>Staff: plumber@test.com / staff123</p>
-            </div>
+            <!-- Credentials removed for production -->
         </div>
     </div>
 </body>

@@ -65,7 +65,7 @@
                                 <th>Date</th>
                                 <th>Status</th>
                                 <th>Assigned To</th>
-                                <th>Action</th>
+                                <th>Action / Feedback</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -89,12 +89,14 @@
                 complaints.slice().reverse().forEach(c => { // Show newest first
                     const row = document.createElement('tr');
 
-                    // Determine Button State
+                    // Determine Button State & Feedback Display
                     let actionBtn = '';
                     if (c.status === 'Submitted') {
                         actionBtn = `<button class="btn assign-btn" onclick="handleAssign(this, ${c.id})" style="padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem;">Assign</button>`;
+                    } else if (c.status === 'Resolved' && c.feedback) {
+                        actionBtn = `<span title="${c.feedback.comment}" style="cursor: help;">★ ${c.feedback.rating}/5</span>`;
                     } else {
-                        actionBtn = `<button class="btn" style="padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem; background: #ccc; cursor: default;" disabled>Done</button>`;
+                        actionBtn = `<button disabled style="opacity: 0.5; padding: 0.25rem 0.5rem; min-width: 60px; font-size: 0.8rem;">${c.status}</button>`;
                     }
 
                     let assignedTo = c.status === 'Submitted' ? '<span style="color:#9ca3af;">--</span>' : 'Staff Member';
@@ -102,11 +104,13 @@
                     // Priority Badge Color
                     let badgeClass = c.priority === 'High' ? 'badge-high' : (c.priority === 'Medium' ? 'badge-medium' : 'badge-low');
 
+                    const mediaHint = c.media ? `<br><small style="color:var(--primary-color); cursor:pointer;" onclick="viewMedia(${c.id})">📎 View Media</small>` : '';
+
                     row.innerHTML = `
                         <td><span class="badge ${badgeClass}">${c.priority}</span></td>
                         <td>${c.student}<div style="font-size: 0.75rem; color: #6b7280;">ID: ${c.id}</div></td>
                         <td>${c.room}</td>
-                        <td><strong>${c.title}</strong><br><span style="font-size: 0.85rem; color: #4b5563;">${c.category}</span></td>
+                        <td><strong>${c.title}</strong>${mediaHint}<br><span style="font-size: 0.85rem; color: #4b5563;">${c.category}</span></td>
                         <td>${c.date}</td>
                         <td><span class="badge status-${c.status.toLowerCase()}">${c.status}</span></td>
                         <td>${assignedTo}</td>
@@ -132,9 +136,69 @@
             let complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
             const index = complaints.findIndex(x => x.id === id);
             if (index !== -1) {
+                // Prompt for Tracking Remark
+                const remark = prompt("Add a tracking note for the student (optional):", "Staff assigned to check the issue.");
+
                 complaints[index].status = 'Assigned';
+
+                // Add to tracking history
+                if (!complaints[index].tracking) complaints[index].tracking = [];
+                complaints[index].tracking.push({
+                    role: 'Warden',
+                    text: remark || 'Staff assigned.',
+                    date: new Date().toLocaleString()
+                });
+
                 localStorage.setItem('hostel_complaints', JSON.stringify(complaints));
+
+                // Update Badge in UI immediately to reflect change
+                const statusBadge = row.querySelector('.status-' + complaints[index].status.toLowerCase()) || row.querySelector('.badge');
+                if (statusBadge) {
+                    statusBadge.className = 'badge status-assigned';
+                    statusBadge.textContent = 'Assigned';
+                }
             }
+        }
+
+        // View Media & Overlay Logic (Shared)
+        window.viewMedia = function (id) {
+            const complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
+            const complaint = complaints.find(c => c.id === id);
+            if (!complaint || !complaint.media) return;
+
+            let mediaHtml = '';
+            if (complaint.mediaType && complaint.mediaType.startsWith('video/')) {
+                mediaHtml = `<video controls style="max-width: 100%; border-radius: 0.5rem; margin-top: 1rem;"><source src="${complaint.media}" type="${complaint.mediaType}">Your browser does not support the video tag.</video>`;
+            } else {
+                mediaHtml = `<img src="${complaint.media}" style="max-width: 100%; border-radius: 0.5rem; margin-top: 1rem;" alt="Complaint Media">`;
+            }
+
+            const html = `
+                <h3>Media Attachment: #${id}</h3>
+                ${mediaHtml}
+                <div style="margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
+                    <strong>Description:</strong><br>${complaint.description || 'No description provided.'}
+                </div>
+                <button class="btn" style="margin-top: 1rem; background: #ccc;" onclick="closeOverlay()">Close</button>
+            `;
+            showOverlay(html);
+        };
+
+        function showOverlay(content) {
+            let overlay = document.getElementById('custom-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'custom-overlay';
+                overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;';
+                document.body.appendChild(overlay);
+            }
+            overlay.innerHTML = `<div style="background: white; padding: 2rem; border-radius: 1rem; max-width: 400px; width: 90%; position: relative;">${content}</div>`;
+            overlay.style.display = 'flex';
+        }
+
+        window.closeOverlay = function () {
+            const overlay = document.getElementById('custom-overlay');
+            if (overlay) overlay.style.display = 'none';
         }
     </script>
 </body>
