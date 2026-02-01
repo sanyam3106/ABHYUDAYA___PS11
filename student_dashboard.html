@@ -17,7 +17,7 @@
                 <h2>HostelEase</h2>
             </div>
             <div class="user-info">
-                <p><strong>Welcome, Student One</strong></p>
+                <p><strong>Welcome, Student</strong></p>
                 <p>Hostel: Hostel A</p>
             </div>
             <ul class="sidebar-menu">
@@ -95,20 +95,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>#101</td>
-                            <td>Broken Fan Switch</td>
-                            <td>Electricity</td>
-                            <td>Oct 10, 2023</td>
-                            <td><span class="badge status-submitted">Submitted</span></td>
-                        </tr>
-                        <tr>
-                            <td>#98</td>
-                            <td>Water Leakage</td>
-                            <td>Plumbing</td>
-                            <td>Oct 05, 2023</td>
-                            <td><span class="badge status-resolved">Resolved</span></td>
-                        </tr>
+                        <!-- Complaints will appear here when submitted -->
                     </tbody>
                 </table>
             </div>
@@ -119,24 +106,87 @@
     <script>
         function handleStaticSubmit(e) {
             e.preventDefault();
-            // Create success message element
+
+            // Get form values
+            const form = document.getElementById('staticComplaintForm');
+            const title = form.title.value;
+            const category = form.category.value;
+            const priority = form.priority.value;
+            const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            // Generate random ID
+            const id = Math.floor(Math.random() * 1000) + 100;
+
+            const complaint = {
+                id: id,
+                title: title,
+                category: category,
+                priority: priority,
+                date: date,
+                status: 'Submitted',
+                student: 'Student (Demo)',
+                room: '101'
+            };
+
+            // Save to LocalStorage
+            let complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
+            complaints.push(complaint);
+            localStorage.setItem('hostel_complaints', JSON.stringify(complaints));
+
+            // UI Update (same as before)
+            const tbody = document.querySelector('tbody');
+            if (tbody.innerHTML.includes('<!-- Complaints will appear here')) {
+                tbody.innerHTML = '';
+            }
+
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>#${id}</td>
+                <td>${title}</td>
+                <td>${category}</td>
+                <td>${date}</td>
+                <td><span class="badge status-submitted">Submitted</span></td>
+            `;
+
+            newRow.style.animation = 'fadeIn 0.5s';
+            if (tbody.firstChild) {
+                tbody.insertBefore(newRow, tbody.firstChild);
+            } else {
+                tbody.appendChild(newRow);
+            }
+
             const msg = document.createElement('div');
             msg.style.cssText = 'background-color: #dcfce7; color: #166534; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem; animation: fadeIn 0.5s;';
-            msg.textContent = 'Complaint submitted successfully! (Demo Mode)';
+            msg.textContent = 'Complaint submitted successfully!';
 
-            // Insert after header
             const header = document.querySelector('.header');
             header.parentNode.insertBefore(msg, header.nextSibling);
 
-            // Reset form
-            document.getElementById('staticComplaintForm').reset();
-
-            // Remove message after 3 seconds
+            form.reset();
             setTimeout(() => {
                 msg.style.opacity = '0';
                 setTimeout(() => msg.remove(), 500);
             }, 3000);
         }
+
+        // Load existing complaints on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
+            const tbody = document.querySelector('tbody');
+            if (complaints.length > 0) {
+                tbody.innerHTML = '';
+                complaints.slice().reverse().forEach(c => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>#${c.id}</td>
+                        <td>${c.title}</td>
+                        <td>${c.category}</td>
+                        <td>${c.date}</td>
+                        <td><span class="badge status-${c.status.toLowerCase()}">${c.status}</span></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        });
     </script>
 </body>
 

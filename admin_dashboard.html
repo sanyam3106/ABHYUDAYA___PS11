@@ -69,37 +69,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><span class="badge badge-high">High</span></td>
-                                <td>John Doe<div style="font-size: 0.75rem; color: #6b7280;">ID: 105</div>
-                                </td>
-                                <td>204</td>
-                                <td><strong>Short Circuit</strong><br><span
-                                        style="font-size: 0.85rem; color: #4b5563;">Electricity</span></td>
-                                <td>Oct 12</td>
-                                <td><span class="badge status-submitted">Submitted</span></td>
-                                <td><span style="color:#9ca3af;">--</span></td>
-                                <td>
-                                    <button class="btn"
-                                        style="padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem;">Assign</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="badge badge-medium">Medium</span></td>
-                                <td>Jane Smith<div style="font-size: 0.75rem; color: #6b7280;">ID: 102</div>
-                                </td>
-                                <td>108</td>
-                                <td><strong>No Water</strong><br><span
-                                        style="font-size: 0.85rem; color: #4b5563;">Plumbing</span></td>
-                                <td>Oct 11</td>
-                                <td><span class="badge status-assigned">Assigned</span></td>
-                                <td>Plumber A</td>
-                                <td>
-                                    <button class="btn"
-                                        style="padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem; background: #ccc;"
-                                        disabled>Done</button>
-                                </td>
-                            </tr>
+                            <!-- Complaints loaded from LocalStorage -->
                         </tbody>
                     </table>
                 </div>
@@ -108,25 +78,64 @@
     </div>
     <script src="script.js"></script>
     <script>
-        document.querySelectorAll('.btn').forEach(btn => {
-            if (btn.textContent === 'Assign') {
-                btn.onclick = function () {
-                    // Find the row
-                    const row = this.closest('tr');
-                    // Change Status to Assigned
-                    const statusCell = row.cells[5];
-                    statusCell.innerHTML = '<span class="badge status-assigned">Assigned</span>';
-                    // Change Assigned To
-                    const assignCell = row.cells[6];
-                    assignCell.textContent = 'Staff Member (Demo)';
-                    // Disable button
-                    this.textContent = 'Done';
-                    this.disabled = true;
-                    this.style.background = '#ccc';
-                    this.style.cursor = 'default';
-                }
+        document.addEventListener('DOMContentLoaded', () => {
+            const complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
+            const tbody = document.querySelector('tbody');
+
+            if (complaints.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: #6b7280;">No complaints found. Submit one from the Student Dashboard!</td></tr>';
+            } else {
+                tbody.innerHTML = ''; // Clear loading/placeholder
+                complaints.slice().reverse().forEach(c => { // Show newest first
+                    const row = document.createElement('tr');
+
+                    // Determine Button State
+                    let actionBtn = '';
+                    if (c.status === 'Submitted') {
+                        actionBtn = `<button class="btn assign-btn" onclick="handleAssign(this, ${c.id})" style="padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem;">Assign</button>`;
+                    } else {
+                        actionBtn = `<button class="btn" style="padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem; background: #ccc; cursor: default;" disabled>Done</button>`;
+                    }
+
+                    let assignedTo = c.status === 'Submitted' ? '<span style="color:#9ca3af;">--</span>' : 'Staff Member';
+
+                    // Priority Badge Color
+                    let badgeClass = c.priority === 'High' ? 'badge-high' : (c.priority === 'Medium' ? 'badge-medium' : 'badge-low');
+
+                    row.innerHTML = `
+                        <td><span class="badge ${badgeClass}">${c.priority}</span></td>
+                        <td>${c.student}<div style="font-size: 0.75rem; color: #6b7280;">ID: ${c.id}</div></td>
+                        <td>${c.room}</td>
+                        <td><strong>${c.title}</strong><br><span style="font-size: 0.85rem; color: #4b5563;">${c.category}</span></td>
+                        <td>${c.date}</td>
+                        <td><span class="badge status-${c.status.toLowerCase()}">${c.status}</span></td>
+                        <td>${assignedTo}</td>
+                        <td>${actionBtn}</td>
+                     `;
+                    tbody.appendChild(row);
+                });
             }
         });
+
+        // Global function for Assign button
+        window.handleAssign = function (btn, id) {
+            const row = btn.closest('tr');
+            // Update UI
+            row.cells[5].innerHTML = '<span class="badge status-assigned">Assigned</span>';
+            row.cells[6].textContent = 'Staff Member';
+            btn.textContent = 'Done';
+            btn.disabled = true;
+            btn.style.background = '#ccc';
+            btn.style.cursor = 'default';
+
+            // Update LocalStorage
+            let complaints = JSON.parse(localStorage.getItem('hostel_complaints')) || [];
+            const index = complaints.findIndex(x => x.id === id);
+            if (index !== -1) {
+                complaints[index].status = 'Assigned';
+                localStorage.setItem('hostel_complaints', JSON.stringify(complaints));
+            }
+        }
     </script>
 </body>
 

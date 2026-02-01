@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warden Admin Dashboard - HostelEase</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>HostelEase</h2>
+                <span class="badge badge-high">ADMIN</span>
+            </div>
+            <div class="user-info">
+                <p><strong>Welcome, Warden Admin</strong></p>
+                <p>Warden Panel</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="#overview" class="menu-link active">Overview</a></li>
+                <li class="menu-item"><a href="#complaints" class="menu-link">Manage Complaints</a></li>
+                <li class="menu-item"><a href="login.html" class="menu-link" style="color: var(--danger);">Logout</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Admin Dashboard</h1>
+            </div>
+
+            <!-- Stats Overview -->
+            <section id="overview" class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">42</div>
+                    <div class="stat-label">Total Complaints</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--warning);">
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Pending / Submitted</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--success);">
+                    <div class="stat-value">37</div>
+                    <div class="stat-label">Resolved / Closed</div>
+                </div>
+            </section>
+
+            <!-- Complaints Management -->
+            <section id="complaints" class="card">
+                <h3>All Complaints (Priority View)</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Priority</th>
+                                <th>Student</th>
+                                <th>Room</th>
+                                <th>Complaint</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Assigned To</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge badge-high">High</span></td>
+                                <td>John Doe<div style="font-size: 0.75rem; color: #6b7280;">ID: 105</div>
+                                </td>
+                                <td>204</td>
+                                <td><strong>Short Circuit</strong><br><span
+                                        style="font-size: 0.85rem; color: #4b5563;">Electricity</span></td>
+                                <td>Oct 12</td>
+                                <td><span class="badge status-submitted">Submitted</span></td>
+                                <td><span style="color:#9ca3af;">--</span></td>
+                                <td>
+                                    <button class="btn"
+                                        style="padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem;">Assign</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-medium">Medium</span></td>
+                                <td>Jane Smith<div style="font-size: 0.75rem; color: #6b7280;">ID: 102</div>
+                                </td>
+                                <td>108</td>
+                                <td><strong>No Water</strong><br><span
+                                        style="font-size: 0.85rem; color: #4b5563;">Plumbing</span></td>
+                                <td>Oct 11</td>
+                                <td><span class="badge status-assigned">Assigned</span></td>
+                                <td>Plumber A</td>
+                                <td>
+                                    <button class="btn"
+                                        style="padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem; background: #ccc;"
+                                        disabled>Done</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        document.querySelectorAll('.btn').forEach(btn => {
+            if (btn.textContent === 'Assign') {
+                btn.onclick = function () {
+                    // Find the row
+                    const row = this.closest('tr');
+                    // Change Status to Assigned
+                    const statusCell = row.cells[5];
+                    statusCell.innerHTML = '<span class="badge status-assigned">Assigned</span>';
+                    // Change Assigned To
+                    const assignCell = row.cells[6];
+                    assignCell.textContent = 'Staff Member (Demo)';
+                    // Disable button
+                    this.textContent = 'Done';
+                    this.disabled = true;
+                    this.style.background = '#ccc';
+                    this.style.cursor = 'default';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
