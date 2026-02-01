@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard - HostelEase</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>HostelEase</h2>
+                <span class="badge" style="background-color: #e2e8f0; color: #475569;">STAFF</span>
+            </div>
+            <div class="user-info">
+                <p><strong>Staff Member</strong></p>
+                <p>Maintenance Staff</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="#tasks" class="menu-link active">My Tasks</a></li>
+                <li class="menu-item"><a href="login.html" class="menu-link" style="color: var(--danger);">Logout</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Staff Dashboard</h1>
+            </div>
+
+            <!-- Assigned Tasks -->
+            <section id="tasks" class="card">
+                <h3>Assigned Maintenance Requests</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Priority</th>
+                                <th>Issue Details</th>
+                                <th>Location</th>
+                                <th>Assigned Date</th>
+                                <th>Current Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge badge-high">High</span></td>
+                                <td><strong>Power Failure</strong><br><span
+                                        style="font-size: 0.85rem; color: #4b5563;">Room is dark</span></td>
+                                <td>Hostel A<br>Room: 202</td>
+                                <td>Oct 12, 10:00</td>
+                                <td><span class="badge status-assigned">Assigned</span></td>
+                                <td>
+                                    <button class="btn"
+                                        style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto; background-color: var(--warning);">Start
+                                        Work</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-low">Low</span></td>
+                                <td><strong>Loose Hindge</strong><br><span
+                                        style="font-size: 0.85rem; color: #4b5563;">Cupboard door</span></td>
+                                <td>Hostel B<br>Room: 104</td>
+                                <td>Oct 11, 14:30</td>
+                                <td><span class="badge status-inprogress">In Progress</span></td>
+                                <td>
+                                    <button class="btn"
+                                        style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto; background-color: var(--success);">Mark
+                                        Resolved</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.onclick = function () {
+                const row = this.closest('tr');
+                const statusCell = row.cells[4]; // Index 4 is Status column
+
+                if (this.textContent.trim() === 'Start Work') {
+                    // Update Status Badge
+                    statusCell.innerHTML = '<span class="badge status-inprogress">In Progress</span>';
+                    // Update Button
+                    this.textContent = 'Mark Resolved';
+                    this.style.backgroundColor = 'var(--success)';
+                } else if (this.textContent.trim() === 'Mark Resolved') {
+                    // Update Status Badge
+                    statusCell.innerHTML = '<span class="badge status-resolved">Resolved</span>';
+                    // Update Button (Hide actions)
+                    row.cells[5].innerHTML = '<span style="color: var(--success); font-size: 1.2rem;">&#10003;</span>';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

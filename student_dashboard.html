@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - HostelEase</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>HostelEase</h2>
+            </div>
+            <div class="user-info">
+                <p><strong>Welcome, Student One</strong></p>
+                <p>Hostel: Hostel A</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="#new-complaint" class="menu-link active" onclick="setActive(this)">New
+                        Complaint</a></li>
+                <li class="menu-item"><a href="#my-complaints" class="menu-link" onclick="setActive(this)">My
+                        Complaints</a></li>
+                <li class="menu-item"><a href="#feedback" class="menu-link" onclick="setActive(this)">Feedback</a></li>
+                <li class="menu-item"><a href="login.html" class="menu-link" style="color: var(--danger);">Logout</a>
+                </li>
+            </ul>
+        </div>
+        <script>
+            function setActive(el) {
+                document.querySelectorAll('.menu-link').forEach(a => a.classList.remove('active'));
+                el.classList.add('active');
+            }
+        </script>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Student Dashboard</h1>
+        </div>
+
+        <!-- New Complaint Section -->
+        <section id="new-complaint" class="card">
+            <h3>Add New Complaint</h3>
+            <form id="staticComplaintForm" onsubmit="handleStaticSubmit(event)">
+                <div class="form-group">
+                    <label>Complaint Title</label>
+                    <input type="text" name="title" class="form-control" required
+                        placeholder="e.g., Leaking Tap in Room 101">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="category" class="form-control" required>
+                        <option value="Plumbing">Plumbing</option>
+                        <option value="Electricity">Electricity</option>
+                        <option value="Cleanliness">Cleanliness</option>
+                        <option value="Internet">Internet</option>
+                        <option value="Room Issues">Room Issues</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priority (Urgency)</label>
+                    <select name="priority" class="form-control" required>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" class="form-control" rows="4" required
+                        placeholder="Describe the issue in detail..."></textarea>
+                </div>
+                <button type="submit" class="btn">Submit Complaint</button>
+            </form>
+        </section>
+
+        <!-- My Complaints List -->
+        <section id="my-complaints" class="card">
+            <h3>My Complaints</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>IDs</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#101</td>
+                            <td>Broken Fan Switch</td>
+                            <td>Electricity</td>
+                            <td>Oct 10, 2023</td>
+                            <td><span class="badge status-submitted">Submitted</span></td>
+                        </tr>
+                        <tr>
+                            <td>#98</td>
+                            <td>Water Leakage</td>
+                            <td>Plumbing</td>
+                            <td>Oct 05, 2023</td>
+                            <td><span class="badge status-resolved">Resolved</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        function handleStaticSubmit(e) {
+            e.preventDefault();
+            // Create success message element
+            const msg = document.createElement('div');
+            msg.style.cssText = 'background-color: #dcfce7; color: #166534; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem; animation: fadeIn 0.5s;';
+            msg.textContent = 'Complaint submitted successfully! (Demo Mode)';
+
+            // Insert after header
+            const header = document.querySelector('.header');
+            header.parentNode.insertBefore(msg, header.nextSibling);
+
+            // Reset form
+            document.getElementById('staticComplaintForm').reset();
+
+            // Remove message after 3 seconds
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                setTimeout(() => msg.remove(), 500);
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

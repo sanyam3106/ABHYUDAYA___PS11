@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - HostelEase</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h1>HostelEase</h1>
+                <p>Complaint Management System</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleStaticLogin(event)">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" required
+                        placeholder="Enter your password">
+                </div>
+
+                <div class="form-group">
+                    <label>Select Role</label>
+                    <div class="checkbox-group">
+                        <select id="role" class="form-control" required>
+                            <option value="">-- Select Role --</option>
+                            <option value="student">Student</option>
+                            <option value="admin">Warden (Admin)</option>
+                            <option value="staff">Staff</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Login</button>
+            </form>
+
+            <div
+                style="margin-top: 1rem; text-align: center; font-size: 0.8rem; color: #6b7280; background: #f3f4f6; padding: 10px; border-radius: 8px;">
+                <p><strong>Demo Credentials:</strong></p>
+                <div style="margin-top: 5px; text-align: left; display: inline-block;">
+                    <p>🎓 <strong>Student:</strong> student@test.com / password123</p>
+                    <p>🛡️ <strong>Admin:</strong> admin@test.com / admin123</p>
+                    <p>🔧 <strong>Staff:</strong> plumber@test.com / staff123</p>
+                </div>
+                <p style="margin-top: 8px;">(For static demo, just select Role & click Login)</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleStaticLogin(e) {
+            e.preventDefault();
+            const role = document.getElementById('role').value;
+            if (role === 'student') {
+                window.location.href = 'student_dashboard.html';
+            } else if (role === 'admin') {
+                window.location.href = 'admin_dashboard.html';
+            } else if (role === 'staff') {
+                window.location.href = 'staff_dashboard.html';
+            } else {
+                alert('Please select a role.');
+            }
+        }
+    </script>
+</body>
+
+</html>
